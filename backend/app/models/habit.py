@@ -9,13 +9,11 @@ class Habit(Base):
     __tablename__ = "habits"
 
     id = Column(Integer, primary_key=True, index=True)
-    
     # Связь с пользователем
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     
     name = Column(String, nullable=False, index=True)
     description = Column(String, nullable=True)
-    
     # Как часто нужно выполнять привычку
     frequency = Column(String, default="daily")  # daily, weekly, custom и т.д.
     
@@ -25,6 +23,7 @@ class Habit(Base):
     
     # Связь обратно с пользователем
     user = relationship("User", back_populates="habits")
-
+    logs = relationship("HabitLog", back_populates="habit", cascade="all, delete-orphan")
+    
     def __repr__(self):
         return f"<Habit {self.name} (user_id={self.user_id})>"
