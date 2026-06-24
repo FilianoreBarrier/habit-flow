@@ -1,4 +1,3 @@
-from typing import List, Optional
 
 from app.models.user import User
 from app.schemas.user import UserCreate
@@ -8,9 +7,9 @@ from sqlalchemy.orm import Session, selectinload
 
 class UserRepository:
     def __init__(self, db: Session):
-        self.db =db
+        self.db = db
 
-    def get_all(self) -> List[User]:
+    def get_all(self) -> list[User]:
         stmt = select(User).options(selectinload(User.habits))
         return list(self.db.scalars(stmt).all())
 
@@ -35,6 +34,6 @@ class UserRepository:
         self.db.commit()
         self.db.refresh(db_user)
         return db_user
-    def get_multiple_by_ids(self, user_ids: List[int])-> List[User]:
+    def get_multiple_by_ids(self, user_ids: list[int])-> list[User]:
         stmt = select(User).where(User.user_id.in_(user_ids))
         return list(self.db.scalars(stmt).all())
