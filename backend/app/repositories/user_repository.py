@@ -1,6 +1,6 @@
 
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserUpdate
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -34,6 +34,17 @@ class UserRepository:
         self.db.commit()
         self.db.refresh(db_user)
         return db_user
+    
+    def update(self, user_id: int, user_update: UserUpdate) -> User | None:
+        user = self.get_by_id(user_id)
+        if user:
+            update_data = user_update.model_dump(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(user, key, value)
+            self.db.commit()
+            self.db.refresh(user)
+        return user
+
     def get_multiple_by_ids(self, user_ids: list[int])-> list[User]:
         stmt = select(User).where(User.user_id.in_(user_ids))
         return list(self.db.scalars(stmt).all())
