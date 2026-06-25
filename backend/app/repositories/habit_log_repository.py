@@ -39,11 +39,11 @@ class HabitLogRepository:
              return db_log
         
         def update(self, log_id: int, log_update: HabitLogUpdate) -> HabitLog | None:
-            habitlog = self.get_by_id(log_id)
-            if habitlog:
+            log = self.get_by_id(log_id)
+            if log:
                 update_data = log_update.model_dump(exclude_unset=True)
                 for key, value in update_data.items():
-                    setattr(habitlog, key, value)
+                    setattr(log, key, value)
                 self.db.commit()
-                self.db.refresh(habitlog)
-            return habitlog
+                self.db.refresh(log)
+            return log
