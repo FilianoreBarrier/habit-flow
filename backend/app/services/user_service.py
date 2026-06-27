@@ -28,6 +28,32 @@ class UserService:
         user = self.user_repository.create(user_data, hashed_password)
         return UserResponse.model_validate(user)
 
+    def get_by_id(self, user_id: int) -> UserResponse:
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'User with id {user_id} not found.'
+            )
+        return UserResponse.model_validate(user)
+    
+    def update_user():
+        ...
+    def get_by_email():
+        ...
+    def authenticate_user():
+        ...
+    def get_by_username():
+        ...
+    def get_current_user():
+        ...
+    def change_password():
+        ...
+    def deactivate_user():
+        ...
+    def list_users():
+        ...
+    
 #     def get_all_products (self) -> ProductListResponse:
 #         products = self.product_repository.get_all()
 #         products_response=[ProductResponse.model_validate(prod) for prod in products]
@@ -52,13 +78,3 @@ class UserService:
 #         products = self.product_repository.get_by_category(category_id)
 #         products_response = [ProductResponse.model_validate(prod) for prod in products]
 #         return ProductListResponse(products=products_response, total = len(products_response))
-
-#     def create_product(self, product_data: ProductCreate) -> ProductResponse:
-#         category = self.category_repository.get_by_id(product_data.category_id)
-#         if not category:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail=f'Category with id {product_data.category_id} does not exist'
-#             )
-#         product = self.product_repository.create(product_data)
-#         return ProductResponse.model_validate(product)
