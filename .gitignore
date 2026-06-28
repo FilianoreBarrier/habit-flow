@@ -28,6 +28,8 @@ pip-delete-this-directory.txt
 .pytest_cache/
 htmlcov/
 .env
+backend/app/.env
+app/.env
 .venv
 env/
 venv/
