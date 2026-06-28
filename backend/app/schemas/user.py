@@ -12,11 +12,8 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str = Field(min_length=8,pattern=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$'
 , description='User password for authorization')
-class UserResponse(BaseModel):
+class UserResponse(UserBase):
     id: int = Field(description="Unique user identifier")
-    username: str
-    email:EmailStr
-    full_name: Optional[str] = None
     is_active: bool = Field(description='Shows user activity ')
     created_at: datetime
     model_config = {"from_attributes":True}
