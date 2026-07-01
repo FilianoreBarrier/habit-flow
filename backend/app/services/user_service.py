@@ -57,12 +57,9 @@ class UserService:
             )
      
         new_hashed_password = get_password_hash(new_password)
+        updated_user = self.user_repository.update(user_id, UserUpdate(hashed_password= new_hashed_password))
 
-        user.hashed_password = new_hashed_password # type: ignore[attr-defined]
-        self.user_repository.db.commit()          # позже можно вынести в репозиторий
-        self.user_repository.db.refresh(user)
-
-        return UserResponse.model_validate(user)
+        return UserResponse.model_validate(updated_user)
 
 
     def authenticate_user(self, email: str, password: str) -> UserResponse:
@@ -73,7 +70,7 @@ class UserService:
             detail="Incorrect email or password"
         )
 
-        if not verify_password(password, hashed_password): # type: ignore[attr-defined]
+        if not verify_password(password, user.hashed_password): # type: ignore[attr-defined]
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password"
@@ -87,10 +84,24 @@ class UserService:
         return UserResponse.model_validate(user)
         
         
-    def deactivate_user():
-        ...
-    def list_users():
-        ...
+    def deactivate_user(self, user_id: int) -> UserResponse:
+        user = self.user_repository.get_by_id(user_id)
+
+        if not user:
+            raise_user_not_found(user_id)
+
+        if not user.is_active:# type: ignore[attr-defined]
+            return UserResponse.model_validate(user)
+        
+        user.is_active = False # type: ignore[attr-defined]
+
+        updated_user = self.user_repository.update(user_id, UserUpdate(is_active=False))
+
+        return UserResponse.model_validate(updated_user)
+
+    def list_users(self) -> List[UserResponse]:
+        users = self.user_repository.get_all()
+        return [UserResponse.model_validate(user) for user in users]
 
     '''get methods'''
     def get_by_id(self, user_id: int) -> UserResponse:
@@ -104,7 +115,7 @@ class UserService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with this email not found."
+                detail="User with this email not found."
             )
         return UserResponse.model_validate(user)
 
@@ -113,12 +124,6 @@ class UserService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with this username not found."
+                detail="User with this username not found."
             )
         return UserResponse.model_validate(user)
-
-    def get_all_users(self) -> list[UserResponse]:
-        users = self.user_repository.get_all()
-        return [UserResponse.model_validate(user) for user in users]
-        
-
