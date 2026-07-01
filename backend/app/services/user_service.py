@@ -1,5 +1,6 @@
 from typing import List
 
+from app.core.exceptions import raise_user_not_found
 from app.core.security import get_password_hash, verify_password
 from app.repositories.habit_repository import HabitRepository
 from app.repositories.user_repository import UserRepository
@@ -31,15 +32,38 @@ class UserService:
     def update_user(self, user_id: int, user_update: UserUpdate) -> UserResponse:
         user = self.user_repository.get_by_id(user_id)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'User with id {user_id} not found.'
-            )
+            raise_user_not_found(user_id)
         updated_user = self.user_repository.update(user_id,user_update)
         return UserResponse.model_validate(updated_user)
     
-    def change_password():
-        ...
+    def change_password(self, user_id: int, old_password: str, new_password: str) -> UserResponse:
+        """Смена пароля пользователя"""
+      
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise_user_not_found(user_id)
+
+        # Сheking old password
+        if not verify_password(old_password, user.hashed_password):# type: ignore[attr-defined]
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect old password"
+            )
+        
+        if len(new_password) < 8:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password must be at least 8 characters long"
+            )
+     
+        new_hashed_password = get_password_hash(new_password)
+
+        user.hashed_password = new_hashed_password # type: ignore[attr-defined]
+        self.user_repository.db.commit()          # позже можно вынести в репозиторий
+        self.user_repository.db.refresh(user)
+
+        return UserResponse.model_validate(user)
+
 
     def authenticate_user(self, email: str, password: str) -> UserResponse:
         user = self.user_repository.get_by_email(email)
@@ -72,10 +96,7 @@ class UserService:
     def get_by_id(self, user_id: int) -> UserResponse:
         user = self.user_repository.get_by_id(user_id)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'User with id {user_id} not found.'
-            )
+            raise_user_not_found(user_id)
         return UserResponse.model_validate(user)
     
     def get_by_email(self, email: str) -> UserResponse:
