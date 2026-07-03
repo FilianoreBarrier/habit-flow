@@ -13,3 +13,9 @@ def raise_habit_not_found(habit_id: int):
                 detail = f"Habit with id {habit_id} not found."
 
             )
+def raise_habit_log_not_found(log_id: int):
+    raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = f"Habit log with id {log_id} not found."
+
+            )
