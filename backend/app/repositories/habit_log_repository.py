@@ -47,3 +47,11 @@ class HabitLogRepository:
                 self.db.commit()
                 self.db.refresh(log)
             return log
+        
+        def delete(self, log_id: int) -> bool:
+            log = self.get_by_id(log_id)
+            if log:
+                self.db.delete(log)
+                self.db.commit()
+                return True
+            return False
