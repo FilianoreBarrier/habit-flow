@@ -21,6 +21,7 @@ class HabitLogRepository:
                   .where(HabitLog.user_id == user_id)
                   ).all()
                   )
+        
         def get_by_habit_id(self, habit_id: int) -> list[HabitLog]:
             return list(
                   self.db.scalars(
@@ -28,6 +29,7 @@ class HabitLogRepository:
                   .where(HabitLog.habit_id == habit_id)
                   ).all()
                   )
+        
         def create(self, log_data: HabitLogCreate, user_id:int,habit_id:int) -> HabitLog:
              db_log = HabitLog(**log_data.model_dump(),
                                user_id = user_id,
