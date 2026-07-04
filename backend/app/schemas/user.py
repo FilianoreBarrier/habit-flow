@@ -24,3 +24,7 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
     email: Optional[EmailStr] = None
     hashed_password: Optional[str] = None
+
+class LoginSchema(BaseModel):
+    email: EmailStr = Field(description="Email for login")
+    password: str = Field(description="Password for login")
