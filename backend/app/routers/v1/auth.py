@@ -28,3 +28,12 @@ def login_user(
         "token_type": "bearer",
         "user": UserResponse.model_validate(user)
     }
+
+@router.get("/me", response_model=UserResponse)
+def get_current_user_info(current_user: UserResponse = Depends(get_current_user)):
+    """Получить информацию о текущем пользователе"""
+    return current_user
+
+@router.post('/logout')
+def logout(current_user:UserResponse = Depends(get_current_user)):
+    return {"message": "Successfully logged out"}

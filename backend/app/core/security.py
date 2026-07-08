@@ -32,7 +32,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Создаёт JWT access token"""
-    
+
     to_encode = data.copy()
 
     # Определяем время истечения токена
@@ -45,8 +45,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
     # Создаём JWT токен
     encoded_jwt = jwt.encode(
-        to_encode, 
-        settings.secret_key, 
+        to_encode,
+        settings.secret_key,
         algorithm=settings.algorithm
     )
 
@@ -54,7 +54,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme), 
+    token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> UserResponse:
     """Dependency: Получить текущего пользователя по JWT токену"""
@@ -63,11 +63,11 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         payload = jwt.decode(
-            token, 
-            settings.secret_key, 
+            token,
+            settings.secret_key,
             algorithms=[settings.algorithm]
         )
         user_id: Optional[str] = payload.get("sub")
@@ -86,6 +86,7 @@ def decode_access_token(token: str) -> dict:
     """
     Декодирует JWT токен и возвращает payload.
     """
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -93,11 +94,11 @@ def decode_access_token(token: str) -> dict:
     )
     try:
         payload = jwt.decode(
-            token, 
-            settings.secret_key, 
+            token,
+            settings.secret_key,
             algorithms=[settings.algorithm]
         )
-        return payload 
-    
+        return payload
+
     except JWTError:
         raise credentials_exception
