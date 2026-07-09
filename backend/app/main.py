@@ -1,9 +1,10 @@
-# Импорты внутри пакета app
-from core.config import settings
-from core.database import init_db
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers.v1 import auth, habits, users
+from core.config import settings
+from core.database import init_db
+
+# Импорт роутеров
+from routers.v1 import auth_router, users_router, habits_router, habit_logs_router
 
 app = FastAPI(
     title="HabitFlow",
@@ -19,9 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
-app.include_router(users.router, prefix="/api/v1", tags=["users"])
-app.include_router(habits.router, prefix="/api/v1", tags=["habits"])
+app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
+app.include_router(users_router, prefix="/api/v1", tags=["users"])
+app.include_router(habits_router, prefix="/api/v1", tags=["habits"])
+app.include_router(habit_logs_router, prefix="/api/v1", tags=["habit_logs"])
 
 
 @app.on_event("startup")
