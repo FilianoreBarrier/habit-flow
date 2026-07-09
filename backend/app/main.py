@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from core.config import settings
-from core.database import init_db
+from app.core.config import settings
+from app.core.database import init_db
 
 # Импорт роутеров
-from routers.v1 import auth_router, users_router, habits_router, habit_logs_router
+from app.routers.v1 import auth_router, users_router, habits_router, habit_logs_router
 
 app = FastAPI(
     title="HabitFlow",

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class HabitLogBase(BaseModel):
-    date: date= Field(description="Habit creation date ")
+    cr_date: date= Field(description="Habit creation date ")
     completed: bool = Field(default=True,description="Tracking habit completion")
     note: Optional[str] = Field(None,max_length=100,description='Note')
 class HabitLogCreate(HabitLogBase):

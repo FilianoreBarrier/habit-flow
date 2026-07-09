@@ -10,7 +10,7 @@ class UserBase(BaseModel):
     full_name: Optional[str] = Field(default=None,max_length=50,description='User full name')
 
 class UserCreate(UserBase):
-    password: str = Field(min_length=8,pattern=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$'
+    password: str = Field(min_length=8
 , description='User password for authorization')
 
 class UserResponse(UserBase):
@@ -31,5 +31,5 @@ class LoginSchema(BaseModel):
     password: str = Field(description="Password for login")
 
 class ChangePasswordSchema(BaseModel):
-    old_password: str = Field(min_length=8,pattern=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$')
-    new_password: str = Field(min_length=8,pattern=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$')
+    old_password: str = Field(min_length=8)
+    new_password: str = Field(min_length=8)

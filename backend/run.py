@@ -1,19 +1,11 @@
-import sys
-from pathlib import Path
-
-# Добавляем папку app в PYTHONPATH
-BASE_DIR = Path(__file__).resolve().parent
-APP_DIR = BASE_DIR / "app"
-sys.path.insert(0, str(BASE_DIR))
-sys.path.insert(0, str(APP_DIR))
-
 import uvicorn
-from app.main import app
+from app.core.config import settings
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     uvicorn.run(
-        "app.main:app", 
-        host="127.0.0.1", 
-        port=8000, 
-        reload=True
+        'app.main:app',
+        host = '0.0.0.0',
+        port= 8000,
+        reload=settings.debug,
+        log_level='info'
     )
