@@ -14,7 +14,7 @@ class HabitLog(Base):
 
     # Связи
     habit_id = Column(Integer, ForeignKey("habits.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
 
     # Основные данные
     date = Column(Date, nullable=False, index=True)           # дата выполнения

@@ -21,11 +21,10 @@ def login_user(
     user_service = UserService(db)
     user = user_service.authenticate_user(login_data.email, login_data.password)
 
-    access_token = create_access_token(data={"sub": str(user.id)})
+    access_token = create_access_token(subject=user.id)
 
     return {
         "access_token": access_token,
-        "token_type": "bearer",
         "user": UserResponse.model_validate(user)
     }
 

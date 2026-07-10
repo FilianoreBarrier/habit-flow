@@ -20,4 +20,9 @@ def get_db():
         db.close()
 
 def init_db():
+    # Импортируем все модели
+    from app.models.user import User
+    from app.models.habit import Habit
+    from app.models.habit_log import HabitLog
+
     Base.metadata.create_all(bind=engine)
