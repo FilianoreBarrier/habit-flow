@@ -16,6 +16,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     habits = relationship("Habit", back_populates="user", cascade="all, delete-orphan")
+    habit_logs = relationship("HabitLog", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.email}>"

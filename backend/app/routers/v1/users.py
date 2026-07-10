@@ -25,7 +25,7 @@ def update_user(
     db: Session = Depends(get_db)
     ):
     user_service = UserService(db)
-    return user_service.update_user(current_user.id, user_update)
+    return user_service.update_user(current_user.user_id, user_update)
 
 @router.post('/me/change-password',response_model=UserResponse, status_code=status.HTTP_200_OK)
 def change_user_password(
@@ -34,12 +34,12 @@ def change_user_password(
     db: Session = Depends(get_db)
     ):
     user_service = UserService(db)
-    return user_service.change_password(current_user.id, change_data.old_password, change_data.new_password)
+    return user_service.change_password(current_user.user_id, change_data.old_password, change_data.new_password)
 
 @router.post('/me/deactivate', response_model=UserResponse, status_code=status.HTTP_200_OK)
 def deactivate_user(db: Session = Depends(get_db),current_user:UserResponse = Depends(get_current_user)):
     user_service = UserService(db)
-    return user_service.deactivate_user(current_user.id)
+    return user_service.deactivate_user(current_user.user_id)
 
 @router.get('/{user_id}',response_model=UserResponse, status_code=status.HTTP_200_OK)
 def get_user(user_id: int, db: Session = Depends(get_db)):

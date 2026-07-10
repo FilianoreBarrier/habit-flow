@@ -21,7 +21,7 @@ def login_user(
     user_service = UserService(db)
     user = user_service.authenticate_user(login_data.email, login_data.password)
 
-    access_token = create_access_token(subject=user.id)
+    access_token = create_access_token(subject=user.user_id)
 
     return {
         "access_token": access_token,

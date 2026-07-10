@@ -14,7 +14,7 @@ class UserCreate(UserBase):
 , description='User password for authorization')
 
 class UserResponse(UserBase):
-    id: int = Field(description="Unique user identifier")
+    user_id: int = Field(description="Unique user identifier")
     is_active: bool = Field(description='Shows user activity ')
     created_at: datetime
     model_config = {"from_attributes":True}

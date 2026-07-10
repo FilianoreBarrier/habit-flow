@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Union
-
+import bcrypt
 from app.core.config import settings
 from app.core.database import get_db
 from app.repositories.user_repository import UserRepository
@@ -22,12 +22,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 # ==================== Password Hashing ====================
 def get_password_hash(password: str) -> str:
     """Хэширует пароль с помощью bcrypt"""
-    return pwd_context.hash(password)
+    password_bytes = password[:72].encode('utf-8')
+    hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Проверяет, совпадает ли обычный пароль с хэшем"""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Проверяет пароль"""
+    plain_bytes = plain_password[:72].encode('utf-8')
+    hashed_bytes = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(plain_bytes, hashed_bytes)
 
 
 # ==================== JWT Operations ====================
