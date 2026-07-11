@@ -18,7 +18,7 @@ async def log_habit(habit_id: int,
 
     """Отметить выполнение привычки (лог)"""
     log_service = HabitLogService(db)
-    return log_service.create_log(log_data,habit_id,current_user.id)
+    return log_service.create_log(log_data,habit_id,current_user.user_id)
 
 
 @router.get("/{habit_id}/logs", response_model=list[HabitLogResponse])
@@ -28,7 +28,7 @@ async def get_habit_logs(
     db: Session = Depends(get_db)
 ):
     log_service = HabitLogService(db)
-    return log_service.get_logs_by_habit(habit_id,current_user.id)
+    return log_service.get_logs_by_habit(habit_id,current_user.user_id)
 
 
 @router.get("/logs", response_model=list[HabitLogResponse])
@@ -38,4 +38,4 @@ async def get_user_logs(
 ):
     """Получить все логи текущего пользователя"""
     log_service = HabitLogService(db)
-    return log_service.get_logs_by_user(current_user.id)
+    return log_service.get_logs_by_user(current_user.user_id)
