@@ -57,5 +57,5 @@ class HabitService:
                 status_code = status.HTTP_403_FORBIDDEN,
                 detail = 'You can only delete own habits! '
             )
-        self.habit_repository.delete(habit_id)
+        await self.habit_repository.delete(habit_id)
         return True
