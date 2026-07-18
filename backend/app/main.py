@@ -28,7 +28,7 @@ app.include_router(habit_logs_router, prefix="/api/v1", tags=["habit_logs"])
 
 @app.on_event("startup")
 async def startup_event():
-    init_db()
+    await init_db()
     print("✅ HabitFlow запущен. База данных инициализирована.")
 
 

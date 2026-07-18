@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # ==================== Security Config ====================
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -72,7 +72,7 @@ def decode_access_token(token: str) -> Optional[dict]:
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> UserResponse:
     """Dependency: Автоматически извлекает текущего пользователя по JWT токену"""
     credentials_exception = HTTPException(

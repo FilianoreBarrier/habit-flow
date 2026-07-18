@@ -4,7 +4,7 @@ from app.schemas.habit import HabitUpdate, HabitResponse,HabitCreate
 from app.schemas.user import UserResponse
 from app.services.habit_service import HabitService
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/habits", tags=["habits"])
 
@@ -16,7 +16,7 @@ async def test_habits(current_user: UserResponse = Depends(get_current_user)):
 async def update_habit(
     habit_id: int,
     habit_update: HabitUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: UserResponse = Depends(get_current_user)
 
 ):
@@ -24,25 +24,25 @@ async def update_habit(
     return habit_service.update_habit(habit_id, habit_update, current_user.user_id)
 
 @router.get("/", response_model=list[HabitResponse])
-async def get_user_habits(db: Session = Depends(get_db),current_user: UserResponse = Depends(get_current_user)):
+async def get_user_habits(db: AsyncSession = Depends(get_db),current_user: UserResponse = Depends(get_current_user)):
     """Получить все привычки текущего пользователя"""
     habit_service = HabitService(db)
     return habit_service.get_user_habits(current_user.user_id)
 
 @router.post("/",response_model=HabitResponse, status_code=201)
-async def create_habit(habit_data: HabitCreate, db: Session = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
+async def create_habit(habit_data: HabitCreate, db: AsyncSession = Depends(get_db), current_user: UserResponse = Depends(get_current_user)):
     """Создать новую привычку"""
     habit_service = HabitService(db)
     return habit_service.create_habit(habit_data,current_user.user_id)
 
 @router.get("/{habit_id}", response_model=HabitResponse)
-async def get_habit(habit_id: int, current_user: UserResponse = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_habit(habit_id: int, current_user: UserResponse = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Получить одну привычку"""
     habit_service = HabitService(db)
     return habit_service.get_habit_by_id(habit_id, current_user.user_id)
 
 @router.delete("/{habit_id}")
-async def delete_habit(habit_id: int, current_user: UserResponse = Depends(get_current_user), db: Session = Depends(get_db)):
+async def delete_habit(habit_id: int, current_user: UserResponse = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Удалить привычку"""
     habit_service = HabitService(db)
     return habit_service.delete_habit(habit_id, current_user.user_id)

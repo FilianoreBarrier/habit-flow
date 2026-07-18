@@ -2,49 +2,52 @@
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class UserRepository:
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def get_all(self) -> list[User]:
+    async def get_all(self) -> list[User]:
         stmt = select(User).options(selectinload(User.habits))
-        return list(self.db.scalars(stmt).all())
+        result = await self.db.scalars(stmt)
+        return list(result.all())
 
-    def get_by_id(self,user_id:int) -> User | None:
-        return self.db.get(User, user_id)
-    
-    def get_by_email(self, email: str) -> User | None:
-        return self.db.scalar(select(User).where(User.email == email))
-    
-    def get_by_username(self, username: str) -> User | None:
-        return self.db.scalar(select(User).where(User.username == username))
-                              
-    def create(self, user_data: UserCreate, hashed_password: str) -> User:
+    async def get_by_id(self,user_id:int) -> User | None:
+        return await self.db.get(User, user_id)
+
+    async def get_by_email(self, email: str) -> User | None:
+        return await self.db.scalar(select(User).where(User.email == email))
+
+    async def get_by_username(self, username: str) -> User | None:
+        return await self.db.scalar(select(User).where(User.username == username))
+
+    async def create(self, user_data: UserCreate, hashed_password: str) -> User:
         db_user = User(
-            username = user_data.username,
-            email = user_data.email,
-            full_name =user_data.full_name,
-            hashed_password = hashed_password,
-            is_active = True
+            username=user_data.username,
+            email=user_data.email,
+            full_name=user_data.full_name,
+            hashed_password=hashed_password,
+            is_active=True
         )
         self.db.add(db_user)
-        self.db.commit()
-        self.db.refresh(db_user)
+        await self.db.commit()   # Добавили await
+        await self.db.refresh(db_user) # Добавили await
         return db_user
-    
-    def update(self, user_id: int, user_update: UserUpdate) -> User | None:
-        user = self.get_by_id(user_id)
+
+    async def update(self, user_id: int, user_update: UserUpdate) -> User | None:
+        user = await self.get_by_id(user_id)
         if user:
             update_data = user_update.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(user, key, value)
-            self.db.commit()
-            self.db.refresh(user)
+            await self.db.commit()   # Добавили await
+            await self.db.refresh(user) # Добавили await
         return user
 
-    def get_multiple_by_ids(self, user_ids: list[int])-> list[User]:
+    async def get_multiple_by_ids(self, user_ids: list[int])-> list[User]:
         stmt = select(User).where(User.user_id.in_(user_ids))
-        return list(self.db.scalars(stmt).all())
+        result = await self.db.scalars(stmt)
+        return list(result.all())

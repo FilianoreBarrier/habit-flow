@@ -6,11 +6,11 @@ from app.repositories.habit_repository import HabitRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 class UserService:
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.user_repository = UserRepository(db)
         self.habit_repository = HabitRepository(db)
 
@@ -28,17 +28,17 @@ class UserService:
         hashed_password = get_password_hash(user_data.password)
         user = self.user_repository.create(user_data, hashed_password)
         return UserResponse.model_validate(user)
-    
+
     def update_user(self, user_id: int, user_update: UserUpdate) -> UserResponse:
         user = self.user_repository.get_by_id(user_id)
         if not user:
             raise_user_not_found(user_id)
         updated_user = self.user_repository.update(user_id,user_update)
         return UserResponse.model_validate(updated_user)
-    
+
     def change_password(self, user_id: int, old_password: str, new_password: str) -> UserResponse:
         """Смена пароля пользователя"""
-      
+
         user = self.user_repository.get_by_id(user_id)
         if not user:
             raise_user_not_found(user_id)
@@ -49,13 +49,13 @@ class UserService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect old password"
             )
-        
+
         if len(new_password) < 8:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="New password must be at least 8 characters long"
             )
-     
+
         new_hashed_password = get_password_hash(new_password)
         updated_user = self.user_repository.update(user_id, UserUpdate(hashed_password= new_hashed_password))
 
@@ -75,15 +75,15 @@ class UserService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password"
             )
-        if not user.is_active:# type: ignore[attr-defined]
+        if not user.is_active == "true":# type: ignore[attr-defined]
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User is inactive"
+                detail="User is active"
             )
 
         return UserResponse.model_validate(user)
-        
-        
+
+
     def deactivate_user(self, user_id: int) -> UserResponse:
         user = self.user_repository.get_by_id(user_id)
 
@@ -92,7 +92,7 @@ class UserService:
 
         if not user.is_active:# type: ignore[attr-defined]
             return UserResponse.model_validate(user)
-        
+
         user.is_active = False # type: ignore[attr-defined]
 
         updated_user = self.user_repository.update(user_id, UserUpdate(is_active=False))
@@ -109,7 +109,7 @@ class UserService:
         if not user:
             raise_user_not_found(user_id)
         return UserResponse.model_validate(user)
-    
+
     def get_by_email(self, email: str) -> UserResponse:
         user = self.user_repository.get_by_email(email)
         if not user:

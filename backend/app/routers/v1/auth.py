@@ -3,19 +3,19 @@ from app.core.security import create_access_token, get_current_user
 from app.schemas.user import LoginSchema, UserCreate, UserResponse
 from app.services.user_service import UserService
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 
 @router.post("/register", response_model=UserResponse,status_code=status.HTTP_201_CREATED)
-def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+async def register_user(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     user_service = UserService(db)
     return user_service.create_user(user_data)
 
 @router.post('/login', status_code=status.HTTP_200_OK)
 def login_user(
     login_data: LoginSchema,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
     ):
 
     user_service = UserService(db)
