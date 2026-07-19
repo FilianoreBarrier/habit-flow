@@ -2,11 +2,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import init_db
-
+import logging
 # Импорт роутеров
 from app.routers.v1 import auth_router, users_router, habits_router, habit_logs_router
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from app.core.database import init_db  # Импортируешь свою функцию
+
+logging.basicConfig(level=logging.INFO)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logging.info("Создаем таблицы в PostgreSQL...")
+    await init_db()
+    yield
+    logging.info("Сервер останавливается...")
 
 app = FastAPI(
+    lifespan=lifespan,
     title="HabitFlow",
     description="Приложение для трекинга привычек",
     version="1.0.0"
