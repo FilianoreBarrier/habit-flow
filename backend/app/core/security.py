@@ -11,6 +11,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.repositories.token_repository import TokenRepository
 
 # ==================== Security Config ====================
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -70,18 +71,25 @@ def decode_access_token(token: str) -> Optional[dict]:
 
 # ==================== FastAPI Dependencies ====================
 
-def get_current_user(
+async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db)
 ) -> UserResponse:
-    """Dependency: Автоматически извлекает текущего пользователя по JWT токену"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    # Декодируем токен
+    token_repo = TokenRepository(db)
+    if await token_repo.is_token_blacklisted(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token is blacklisted. Please log in again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 2. Твой старый код (декодирование JWT и поиск юзера) ...
     payload = decode_access_token(token)
     if payload is None:
         raise credentials_exception
