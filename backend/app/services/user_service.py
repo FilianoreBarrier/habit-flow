@@ -1,5 +1,5 @@
 from typing import List
-
+from app.models.token_blacklist import TokenBlackList
 from app.core.exceptions import raise_user_not_found
 from app.core.security import get_password_hash, verify_password
 from app.repositories.habit_repository import HabitRepository
@@ -7,11 +7,13 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, timedelta, timezone
 
 class UserService:
     def __init__(self, db: AsyncSession):
          self.user_repository = UserRepository(db)
          self.habit_repository = HabitRepository(db)
+         self.db = TokenBlackList(db)
 
     async def create_user(self, user_data: UserCreate) -> UserResponse:
         if await  self.user_repository.get_by_email(user_data.email):
@@ -127,5 +129,8 @@ class UserService:
             )
         return UserResponse.model_validate(user)
 
-    async def blacklist_tocken():
-        ...
+    async def blacklist_tocken(self, token: str):
+        expire_time = datetime.now(timezone.utc) + timedelta(days=1)
+        db_token = TokenBlackList(token=token, expires_at=expire_time)
+        self.db.add(db_token)
+        await self.db.commit()

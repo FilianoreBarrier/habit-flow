@@ -33,4 +33,7 @@ async def logout(
     current_user:UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
     token: str = Depends(oauth2_scheme)):
+
+    user_service = UserService(db)
+    await user_service.blacklist_tocken(token)
     return {"message": "Successfully logged out"}
