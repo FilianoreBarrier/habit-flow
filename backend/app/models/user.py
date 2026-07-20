@@ -1,22 +1,31 @@
+from __future__ import annotations
 from datetime import datetime, timezone
-
+from typing import TYPE_CHECKING
 from app.core.database import Base
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
-from sqlalchemy.orm import relationship
-
+from sqlalchemy import  DateTime
+from sqlalchemy.orm import relationship, mapped_column, Mapped
+if TYPE_CHECKING:
+    from .habit import Habit
+    from .habit_log import HabitLog
 
 class User(Base):
     __tablename__ = "users"
-    user_id = Column(Integer, primary_key=True, index=True)
-    username = Column(String,nullable=False,index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    full_name = Column(String, nullable=True)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    user_id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    username:Mapped[str] = mapped_column (index=True)
+    email:Mapped[str]  = mapped_column(unique=True, index=True)
+    hashed_password:Mapped[str]  = mapped_column()
+    full_name:Mapped[str| None] = mapped_column ()
+    is_active:Mapped[bool]  = mapped_column(default=True)
+    created_at:Mapped[datetime]  = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    habits = relationship("Habit", back_populates="user", cascade="all, delete-orphan")
-    habit_logs = relationship("HabitLog", back_populates="user", cascade="all, delete-orphan")
+    habits: Mapped[list[Habit]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+    habit_logs: Mapped[list[HabitLog]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<User {self.email}>"

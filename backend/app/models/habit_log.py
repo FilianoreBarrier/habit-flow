@@ -1,30 +1,34 @@
-from datetime import datetime
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from datetime import datetime,date
+if TYPE_CHECKING:
+    from .user import User
+    from .habit import Habit
 
 from app.core.database import Base
-from sqlalchemy import (Boolean, Column, Date, DateTime, ForeignKey, Integer,
-                        Text)
-from sqlalchemy.orm import relationship
+from sqlalchemy import (DateTime, ForeignKey,Text, DATE)
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
 
 
 class HabitLog(Base):
     __tablename__ = "habit_logs"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id:Mapped[int] = mapped_column(primary_key=True, index=True)
 
     # Связи
-    habit_id = Column(Integer, ForeignKey("habits.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    habit_id:Mapped[int] = mapped_column(ForeignKey("habits.id", ondelete="CASCADE"), )
+    user_id:Mapped[int] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), )
 
     # Основные данные
-    date = Column(Date, nullable=False, index=True)           # дата выполнения
-    completed = Column(Boolean, default=True, nullable=False) # выполнена ли привычка
-    note = Column(Text, nullable=True)                        # заметка (опционально)
+    date:Mapped[date] = mapped_column(DATE,index=True)           # дата выполнения
+    completed:Mapped[bool] = mapped_column(default=True, ) # выполнена ли привычка
+    note:Mapped[str| None] = mapped_column(Text)                        # заметка (опционально)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    habit = relationship("Habit", back_populates="logs")
-    user = relationship("User", back_populates="habit_logs")
+    habit:Mapped[Habit] = relationship(back_populates="logs")
+    user: Mapped[User] = relationship(back_populates="habit_logs")
 
     def __repr__(self):
         return f"<HabitLog(habit_id={self.habit_id}, date={self.date}, completed={self.completed})>"
