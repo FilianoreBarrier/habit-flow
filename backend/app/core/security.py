@@ -100,7 +100,7 @@ async def get_current_user(
         raise credentials_exception
 
     # Ищем пользователя в базе данных через репозиторий
-    user = UserRepository(db).get_by_id(int(user_id))
+    user = await UserRepository(db).get_by_id(int(user_id))
     if user is None:
         raise credentials_exception
 

@@ -33,8 +33,8 @@ class UserRepository:
             is_active=True
         )
         self.db.add(db_user)
-        await self.db.commit()   # Добавили await
-        await self.db.refresh(db_user) # Добавили await
+        await self.db.commit()
+        await self.db.refresh(db_user)
         return db_user
 
     async def update(self, user_id: int, user_update: UserUpdate) -> User | None:
@@ -43,8 +43,8 @@ class UserRepository:
             update_data = user_update.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(user, key, value)
-            await self.db.commit()   # Добавили await
-            await self.db.refresh(user) # Добавили await
+            await self.db.commit()
+            await self.db.refresh(user)
         return user
 
     async def get_multiple_by_ids(self, user_ids: list[int])-> list[User]:

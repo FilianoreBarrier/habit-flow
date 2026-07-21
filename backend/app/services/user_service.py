@@ -65,21 +65,16 @@ class UserService:
 
     async def authenticate_user(self, email: str, password: str) -> UserResponse:
         user = await self.user_repository.get_by_email(email)
-        if not user:
-            raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
-        )
-
-        if not verify_password(password, user.hashed_password): # type: ignore[attr-async defined]
+        if not user or not verify_password(password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password"
+                detail="Incorrect email or password",
+                headers={"WWW-Authenticate": "Bearer"},
             )
-        if not user.is_active == "true":# type: ignore[attr-async defined]
+        if not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User is active"
+                detail="User account is inactive"
             )
 
         return UserResponse.model_validate(user)
