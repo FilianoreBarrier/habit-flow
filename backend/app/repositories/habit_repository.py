@@ -1,6 +1,6 @@
 from app.models.habit import Habit
 from app.schemas.habit import HabitCreate, HabitUpdate
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -38,9 +38,8 @@ class HabitRepository:
         return habit
 
     async def delete(self, habit_id: int) -> bool:
-        habit = await self.get_by_id(habit_id)
-        if habit:
-            await self.db.delete(habit)
-            await self.db.commit()
-            return True
-        return False
+        result = await self.db.execute(
+            delete(Habit).where(Habit.id == habit_id)
+        )
+        await self.db.commit()
+        return result.rowcount > 0 # type: ignore[attr-defined]

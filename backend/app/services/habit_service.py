@@ -52,7 +52,7 @@ class HabitService:
         habit = await self.habit_repository.get_by_id(habit_id)
         if not habit:
             raise_habit_not_found(habit_id)
-        if habit.user_id != user_id: # type: ignore[attr-async defined]
+        if habit.user_id != user_id:# type: ignore[attr-async defined]
             raise HTTPException(
                 status_code = status.HTTP_403_FORBIDDEN,
                 detail = 'You can only delete own habits! '

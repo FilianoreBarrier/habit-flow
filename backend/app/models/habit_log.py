@@ -20,8 +20,7 @@ class HabitLog(Base):
     habit_id:Mapped[int] = mapped_column(ForeignKey("habits.id", ondelete="CASCADE"), )
     user_id:Mapped[int] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), )
 
-    # Основные данные
-    date:Mapped[date] = mapped_column(DATE,index=True)           # дата выполнения
+    cr_date:Mapped[date] = mapped_column(DATE,index=True,default=date.today)           # дата выполнения
     completed:Mapped[bool] = mapped_column(default=True, ) # выполнена ли привычка
     note:Mapped[str| None] = mapped_column(Text)                        # заметка (опционально)
 

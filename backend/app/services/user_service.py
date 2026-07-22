@@ -1,19 +1,23 @@
 from typing import List
 from app.models.token_blacklist import TokenBlackList
 from app.core.exceptions import raise_user_not_found
-from app.core.security import get_password_hash, verify_password
+from app.core.security import get_password_hash,decode_access_token, verify_password
+from app.core.config
 from app.repositories.habit_repository import HabitRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.repositories.token_repository import TokenRepository
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timedelta, timezone
+import jwt
 
 class UserService:
     def __init__(self, db: AsyncSession):
          self.user_repository = UserRepository(db)
          self.habit_repository = HabitRepository(db)
-         self.db = TokenBlackList(db)
+         self.token_respository = TokenRepository(db)
+
 
     async def create_user(self, user_data: UserCreate) -> UserResponse:
         if await  self.user_repository.get_by_email(user_data.email):
@@ -44,7 +48,6 @@ class UserService:
         if not user:
             raise_user_not_found(user_id)
 
-        # Сheking old password
         if not verify_password(old_password, user.hashed_password):# type: ignore[attr-async defined]
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -124,8 +127,26 @@ class UserService:
             )
         return UserResponse.model_validate(user)
 
-    async def blacklist_tocken(self, token: str):
-        expire_time = datetime.now(timezone.utc) + timedelta(days=1)
+    async def blacklist_token(self, token: str) -> bool:
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            exp_timestamp = payload.get("exp")
+
+            if exp_timestamp is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid token payload: missing exp"
+                )
+
+            expire_time = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+
+        except jwt.PyJWTError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate token"
+            )
+
         db_token = TokenBlackList(token=token, expires_at=expire_time)
-        self.db.add(db_token)
-        await self.db.commit()
+        await self.token_respository.add_to_blacklist(db_token)
+
+        return True

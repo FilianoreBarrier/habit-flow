@@ -31,7 +31,7 @@ async def get_habit_logs(
     return await log_service.get_logs_by_habit(habit_id,current_user.user_id)
 
 
-@router.get("/logs", response_model=list[HabitLogResponse])
+@router.get("/my-logs", response_model=list[HabitLogResponse])
 async def get_user_logs(
     current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
